@@ -12,6 +12,6 @@ def get_user_dataframe(db: mysql_connector.CMySQLConnection, table:str = 'user',
 
 
 if __name__ == "__main__":
-    db = sql_reader.connect_to_database('localhost', 'root', 'marcosql2021', 'silck')
+    db = sql_reader.connect_to_database('localhost', 'root', 'root', 'SILCK', 33061)
     print(get_user_list(db))
     print(get_user_dataframe(db))
