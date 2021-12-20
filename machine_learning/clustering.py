@@ -1,8 +1,7 @@
 from sklearn.cluster import KMeans, MiniBatchKMeans
-
-import pandas as pd
-
-def training_kmeans(config, dataframe: pd.DataFrame):
+from sklearn.externals import joblib
+import pickle
+def training_kmeans(config, data):
     """
 
     :param config:
@@ -14,8 +13,8 @@ def training_kmeans(config, dataframe: pd.DataFrame):
         km = MiniBatchKMeans(n_clusters=config['model']['n_clusters'],
                              init="k-means++",
                              n_init=1,
-                             init_size=1000,
-                             batch_size=1000,
+                             init_size=config['machine_learning_configuration']['init_size'],
+                             batch_size=config['machine_learning_configuration']['batch_size'],
                              verbose=config['model']['verbose'])
     else:
         km = KMeans(n_clusters=config['model']['n_clusters'],
@@ -24,11 +23,11 @@ def training_kmeans(config, dataframe: pd.DataFrame):
                     n_init=1,
                     verbose=config['model']['verbose'])
 
-    km.fit(dataframe)
+    km.fit(data)
 
     return km
 
-def test_kmeans(confg, dataframe:pd.DataFrame):
+def test_kmeans(confg, data):
     """
 
     :param confg:
