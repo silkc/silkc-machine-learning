@@ -1,6 +1,7 @@
 from sklearn.cluster import KMeans, MiniBatchKMeans
-from sklearn.externals import joblib
+
 import pickle
+
 def training_kmeans(config, data):
     """
 
@@ -37,12 +38,51 @@ def test_kmeans(confg, data):
     return None
 
 def save_model(config, model):
+    """
 
+    :param config:
+    :param model:
+    :return:
+    """
+    pickle.dump(model, open(config['api_configuration']['model_path'], 'wb'))
     return None
 
 def load_model(config):
+    """
+
+    :param config:
+    :return:
+    """
+
+    model = pickle.load(open(config['api_configuration']['model_path'], 'rb'))
+
+    return model
+
+def infer_kmeans(config, input):
+    """
+
+    :param config:
+    :param input:
+    :return:
+    """
+
+    model = load_model(config)
+
+    # Model inference
 
     return None
 
-def infer_kmeans(model, input):
-    return None
+if __name__ == "__main__":
+    config = {
+        "machine_learning_configuration": {
+            "init_size": 1000,
+            "batch_size": 10,
+            "verbose": True,
+            "n_clusters": 25,
+            "max_iter": 10
+        },
+        "api_configuration": {
+            "model_path": ""
+        }
+    }
+    
