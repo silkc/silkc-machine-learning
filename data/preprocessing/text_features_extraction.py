@@ -31,7 +31,7 @@ def extract_features_from_text(config, dataframe: pd.DataFrame, columns: list, s
                 n_features=config['features']['n_features'],
                 stop_words=stop_words,
                 alternate_sign=alternate_sign,
-                norm=normalize
+                norm=None
             )
             extractor = make_pipeline(hasher, TfidfTransformer())
         else:
@@ -50,18 +50,11 @@ def extract_features_from_text(config, dataframe: pd.DataFrame, columns: list, s
             use_idf=normalize
         )
 
-    feature_dataframe = pd.DataFrame()
+    feature_extracted = extractor.fit_transform(dataframe[columns])
 
-    for column in columns:
-        data_list = dataframe[column].to_list()
-        feature_extracted = extractor.fit_transform(data_list)
-        f_d = pd.DataFrame(columns=[column])
-        f_d[column] = np.array(feature_extracted)
-        feature_dataframe = pd.concat(feature_dataframe, f_d)
+    return feature_extracted
 
-    return feature_dataframe
-
-def reduce_features(config, dataframe: pd.DataFrame, columns: list) -> pd.DataFrame:
+def reduce_features(config, data) -> pd.DataFrame:
     """
 
     :param config:
@@ -73,13 +66,19 @@ def reduce_features(config, dataframe: pd.DataFrame, columns: list) -> pd.DataFr
     normalizer = Normalizer(copy=False)
     lsa = make_pipeline(svd, normalizer)
 
-    feature_dataframe = pd.DataFrame()
+    feature_extracted = lsa.fit_transform(data)
 
-    for column in columns:
-        data_list = dataframe[column].to_list()
-        feature_extracted = lsa.fit_transform(data_list)
-        f_d = pd.DataFrame(columns=[column])
-        f_d[column] = np.array(feature_extracted)
-        feature_dataframe = pd.concat(feature_dataframe, f_d)
+    return feature_extracted
 
-    return feature_dataframe
+if __name__ == "__main__":
+    config = {
+        "features" : {
+            "n_features": 250,
+            "reduced_n_features": 100
+        }
+    }
+
+    dataframe = pd.read_csv("../export/Agglomeration3.csv")
+    column_list = dataframe.columns.to_list()
+    features = extract_features_from_text(config, dataframe, ['occupation_preferred_label', 'occupation_description', 'isco_preferred_label', 'isco_group_description', 'occupation_skill_skill_type'], "english", True, "hashing")
+    features2 = reduce_features(config, features)
