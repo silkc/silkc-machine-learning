@@ -14,8 +14,8 @@ def training_kmeans(config, data):
         km = MiniBatchKMeans(n_clusters=config['model']['n_clusters'],
                              init="k-means++",
                              n_init=1,
-                             init_size=config['machine_learning_configuration']['init_size'],
-                             batch_size=config['machine_learning_configuration']['batch_size'],
+                             init_size=config['model']['init_size'],
+                             batch_size=config['model']['batch_size'],
                              verbose=config['model']['verbose'])
     else:
         km = KMeans(n_clusters=config['model']['n_clusters'],
@@ -73,16 +73,32 @@ def infer_kmeans(config, input):
     return None
 
 if __name__ == "__main__":
+    from data.preprocessing.text_features_extraction import extract_features_from_text
+    import pandas as pd
     config = {
-        "machine_learning_configuration": {
+        "model": {
             "init_size": 1000,
             "batch_size": 10,
             "verbose": True,
-            "n_clusters": 25,
-            "max_iter": 10
+            "n_clusters": 2,
+            "max_iter": 10,
+            "minibatch": False,
         },
         "api_configuration": {
-            "model_path": ""
+            "model_path": "machine_learning/save_model/cluster.sav"
+        },
+        "features": {
+            "n_features": 250,
+            "reduced_n_features": 100
         }
     }
-    
+    dataframe = pd.read_csv("data/export/Agglomeration3.csv")
+    column_list = dataframe.columns.to_list()
+    features = extract_features_from_text(config, dataframe, ['occupation_preferred_label', 'occupation_description',
+                                                              'isco_preferred_label', 'isco_group_description',
+                                                              'occupation_skill_skill_type'], "english", True,
+                                          "hashing")
+    km = training_kmeans(config, features)
+    save_model(config, km)
+    model = load_model(config)
+    print(model)
