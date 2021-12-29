@@ -126,3 +126,5 @@ dmypy.json
 sqldumpdata/
 
 testing_code.py
+
+.idea/
