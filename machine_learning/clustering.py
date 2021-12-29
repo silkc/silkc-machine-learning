@@ -44,6 +44,9 @@ def save_model(config, model):
     :param model:
     :return:
     """
+    import os
+    save_path = os.path.join(config['api_configuration']['model_path'].split(os.sep)[0], config['api_configuration']['model_path'].split(os.sep)[1])
+    os.makedirs(save_path, exist_ok=True)
     pickle.dump(model, open(config['api_configuration']['model_path'], 'wb'))
     return None
 
