@@ -46,24 +46,7 @@ def test_kmeans(confg, model, data, labels):
     adjusted_rand_index = metrics.adjusted_rand_score(labels, model.labels_)
     silhouette_coefficient = metrics.silhouette_score(data, model.labels_, sample_size=1000)
 
-    if config['features']['reduce']:
-        # TODO implement
-        print("Not implemented")
-    else:
-        order_centroids = km.cluster_centers_.argsort()[:, ::-1]
-
-    vectorized = load_vectorized(config)
-    terms = vectorized.get_feature_names_out()
-
-    important_terms = []
-
-    for i in range(len(labels)):
-        i_t = []
-        for ind in order_centroids[i, :10]:
-            i_t.append(f"{terms[ind]}")
-        important_terms.append(i_t)
-
-    return homogeneity_score, completeness_score, v_measure, adjusted_rand_index, silhouette_coefficient, important_terms
+    return homogeneity_score, completeness_score, v_measure, adjusted_rand_index, silhouette_coefficient
 
 def save_model(config, model):
     """
