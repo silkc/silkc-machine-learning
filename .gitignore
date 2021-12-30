@@ -128,3 +128,5 @@ sqldumpdata/
 testing_code.py
 
 .idea/
+
+plot_document_clustering.py

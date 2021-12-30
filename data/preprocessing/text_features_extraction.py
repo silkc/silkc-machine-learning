@@ -8,6 +8,7 @@ from typing import Union
 
 import pandas as pd
 import numpy as np
+import pickle
 
 
 def extract_features_from_text(config, dataframe: pd.DataFrame, columns: list, stop_words: Union[str, list], normalize: bool, modality: str, alternate_sign: bool = False) -> pd.DataFrame:
@@ -52,6 +53,8 @@ def extract_features_from_text(config, dataframe: pd.DataFrame, columns: list, s
 
     feature_extracted = extractor.fit_transform(dataframe[columns])
 
+    save_vectorized(config, extractor)
+
     return feature_extracted
 
 def reduce_features(config, data) -> pd.DataFrame:
@@ -70,12 +73,42 @@ def reduce_features(config, data) -> pd.DataFrame:
 
     return feature_extracted
 
+def save_vectorized(config, vectorized):
+    """
+
+    :param config:
+    :param vectorized:
+    :return:
+    """
+    import os
+    save_path = os.path.join(config['api_configuration']['extractor_path'].split(os.sep)[0],
+                             config['api_configuration']['extractor_path'].split(os.sep)[1])
+    os.makedirs(save_path, exist_ok=True)
+    pickle.dump(vectorized, open(config['api_configuration']['extractor_path'], 'wb'))
+    return None
+
+def load_vectorized(config):
+    """
+
+    :param config:
+    :return:
+    """
+
+    vectorized = pickle.load(open(config['api_configuration']['extractor_path'], 'rb'))
+
+    return vectorized
+
 if __name__ == "__main__":
     config = {
         "features" : {
             "n_features": 250,
+            "reduce": False,
             "reduced_n_features": 100
-        }
+        },
+        "api_configuration": {
+            "model_path": "saved_data/model/cluster.sav",
+            "extractor_path": "saved_data/vectorizer/vectorizer.sav"
+        },
     }
 
     dataframe = pd.read_csv("../export/Agglomeration3.csv")
