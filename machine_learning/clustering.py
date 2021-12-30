@@ -1,5 +1,7 @@
-from sklearn.cluster import KMeans, MiniBatchKMeans
+import random
 
+from sklearn.cluster import KMeans, MiniBatchKMeans
+from sklearn import metrics
 import pickle
 
 def training_kmeans(config, data):
@@ -28,14 +30,40 @@ def training_kmeans(config, data):
 
     return km
 
-def test_kmeans(confg, data):
+def test_kmeans(confg, model, data, labels):
     """
 
     :param confg:
     :param dataframe:
     :return:
     """
-    return None
+
+    from data.preprocessing.text_features_extraction import load_vectorized
+
+    homogeneity_score = metrics.homogeneity_score(labels, model.labels_)
+    completeness_score = metrics.completeness_score(labels, model.labels_)
+    v_measure = metrics.v_measure_score(labels, model.labels_)
+    adjusted_rand_index = metrics.adjusted_rand_score(labels, model.labels_)
+    silhouette_coefficient = metrics.silhouette_score(data, model.labels_, sample_size=1000)
+
+    if config['features']['reduce']:
+        # TODO implement
+        print("Not implemented")
+    else:
+        order_centroids = km.cluster_centers_.argsort()[:, ::-1]
+
+    vectorized = load_vectorized(config)
+    terms = vectorized.get_feature_names_out()
+
+    important_terms = []
+
+    for i in range(len(labels)):
+        i_t = []
+        for ind in order_centroids[i, :10]:
+            i_t.append(f"{terms[ind]}")
+        important_terms.append(i_t)
+
+    return homogeneity_score, completeness_score, v_measure, adjusted_rand_index, silhouette_coefficient, important_terms
 
 def save_model(config, model):
     """
@@ -76,7 +104,7 @@ def infer_kmeans(config, input):
     return None
 
 if __name__ == "__main__":
-    from data.preprocessing.text_features_extraction import extract_features_from_text
+    from data.preprocessing.text_features_extraction import extract_features_from_text, load_vectorized
     import pandas as pd
     config = {
         "model": {
@@ -88,20 +116,26 @@ if __name__ == "__main__":
             "minibatch": False,
         },
         "api_configuration": {
-            "model_path": "machine_learning/save_model/cluster.sav"
+            "model_path": "saved_data/model/cluster.sav",
+            "extractor_path": "saved_data/vectorizer/vectorizer.sav"
         },
         "features": {
             "n_features": 250,
-            "reduced_n_features": 100
+            "reduce": False,
+            "reduced_n_features": 100,
+
         }
     }
     dataframe = pd.read_csv("data/export/Agglomeration3.csv")
     column_list = dataframe.columns.to_list()
     features = extract_features_from_text(config, dataframe, ['occupation_preferred_label', 'occupation_description',
                                                               'isco_preferred_label', 'isco_group_description',
-                                                              'occupation_skill_skill_type'], "english", True,
+                                                              'occupation_skill_skill_type'], "english", False,
                                           "hashing")
     km = training_kmeans(config, features)
     save_model(config, km)
     model = load_model(config)
+
+    print(test_kmeans(config, model, features, [random.randint(0, 1) for i in range(0, 5)]))
+
     print(model)
