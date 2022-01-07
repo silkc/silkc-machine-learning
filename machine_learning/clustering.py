@@ -84,7 +84,7 @@ def infer_kmeans(config, input):
 
     # Model inference
 
-    return None
+    return model
 
 if __name__ == "__main__":
     from data.preprocessing.text_features_extraction import extract_features_from_text, load_vectorized
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     column_list = dataframe.columns.to_list()
     features = extract_features_from_text(config, dataframe, ['occupation_preferred_label', 'occupation_description',
                                                               'isco_preferred_label', 'isco_group_description',
-                                                              'occupation_skill_skill_type'], "english", False,
+                                                              'occupation_skill_skill_type'], "english", True,
                                           "hashing")
     km = training_kmeans(config, features)
     save_model(config, km)
