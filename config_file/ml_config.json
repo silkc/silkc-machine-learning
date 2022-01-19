@@ -1,0 +1,20 @@
+{
+  "model": {
+    "init_size": 100,
+    "batch_size": 10,
+    "verbose": true,
+    "n_clusters": 4,
+    "max_iter": 10,
+    "minibatch": true,
+    "test_sample_size": 100
+    },
+  "api_configuration": {
+    "model_path": "saved_data/model/cluster.sav",
+    "extractor_path": "saved_data/vectorizer/vectorizer.sav"
+    },
+  "features": {
+    "n_features": 500,
+    "reduce": false,
+    "reduced_n_features": 100
+    }
+}
