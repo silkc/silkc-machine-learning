@@ -15,7 +15,8 @@ def set_dataset_path(path):
 
 class Training(Resource):
     def get(self, source):
-        response = {}
+        response = {"status": 0,
+                    "response":{}}
         if source in ['file', 'database']:
             if source == "file":
                 dataframe = pd.read_csv(dataset_path)
@@ -29,6 +30,12 @@ class Training(Resource):
 
             km = training_kmeans(ml_config, features)
             save_model(ml_config, km)
+            response['status'] = 201
+            response['response']['message'] = "The model was successfully created"
+            response['response']['model_path'] = ml_config['api_configuration']['model_path']
+            response['response']['extractor_path'] = ml_config['api_configuration']['extractor_path']
         else:
-            response = {"no"} #TODO change the response
-        return {"ciao"}
+            response['status'] = 404
+            response['response']['message'] = "Model can be created because the source is not recognized"
+
+        return response
