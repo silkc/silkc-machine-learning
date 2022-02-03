@@ -11,7 +11,7 @@ import numpy as np
 import pickle
 
 
-def extract_features_from_text(config, dataframe: pd.DataFrame, columns: list, stop_words: Union[str, list], normalize: bool, modality: str, alternate_sign: bool = False) -> pd.DataFrame:
+def extract_features_from_text(config, dataframe: pd.DataFrame, columns: list, stop_words: Union[str, list], normalize: bool, modality: str, alternate_sign: bool = False, use_saved: bool = False) -> pd.DataFrame:
     """
 
     :param config:
@@ -23,37 +23,40 @@ def extract_features_from_text(config, dataframe: pd.DataFrame, columns: list, s
     :param alternate_sign:
     :return:
     """
-    if modality.lower() not in ['hashing', 'vectorize']:
-        raise NotImplemented("You have to choose between hashing or vectorize modality")
-    extractor = None
-    if modality.lower() == 'hashing':
-        if normalize:
-            hasher = HashingVectorizer(
-                n_features=config['features']['n_features'],
-                stop_words=stop_words,
-                alternate_sign=alternate_sign,
-                norm=None
-            )
-            extractor = make_pipeline(hasher, TfidfTransformer())
-        else:
-            extractor = HashingVectorizer(
-                n_features=config['features']['n_features'],
-                stop_words=stop_words,
-                alternate_sign=alternate_sign,
-                norm="l2"
-            )
+    if use_saved:
+        extractor = load_vectorized(config)
     else:
-        extractor = TfidfVectorizer(
-            max_df=0.7,
-            max_features=config['features']['n_features'],
-            min_df=2,
-            stop_words=stop_words,
-            use_idf=normalize
-        )
+        if modality.lower() not in ['hashing', 'vectorize']:
+            raise NotImplemented("You have to choose between hashing or vectorize modality")
+        extractor = None
+        if modality.lower() == 'hashing':
+            if normalize:
+                hasher = HashingVectorizer(
+                    n_features=config['features']['n_features'],
+                    stop_words=stop_words,
+                    alternate_sign=alternate_sign,
+                    norm=None
+                )
+                extractor = make_pipeline(hasher, TfidfTransformer())
+            else:
+                extractor = HashingVectorizer(
+                    n_features=config['features']['n_features'],
+                    stop_words=stop_words,
+                    alternate_sign=alternate_sign,
+                    norm="l2"
+                )
+        else:
+            extractor = TfidfVectorizer(
+                max_df=0.7,
+                max_features=config['features']['n_features'],
+                min_df=2,
+                stop_words=stop_words,
+                use_idf=normalize
+            )
+
+        save_vectorized(config, extractor)
 
     feature_extracted = extractor.fit_transform(dataframe[columns])
-
-    save_vectorized(config, extractor)
 
     return feature_extracted
 
@@ -115,3 +118,5 @@ if __name__ == "__main__":
     column_list = dataframe.columns.to_list()
     features = extract_features_from_text(config, dataframe, ['occupation_preferred_label', 'occupation_description', 'isco_preferred_label', 'isco_group_description', 'occupation_skill_skill_type'], "english", True, "hashing")
     features2 = reduce_features(config, features)
+    features3 = extract_features_from_text(config, dataframe, ['occupation_preferred_label', 'occupation_description', 'isco_preferred_label', 'isco_group_description', 'occupation_skill_skill_type'], "english", True, "hashing", use_saved=True)
+    print(features3)
