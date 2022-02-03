@@ -1,11 +1,14 @@
 from flask import Flask, request
 from flask_restful import Api
-import training
+import api.training as training
+import api.inference as inference
 
-def start_api(ml_config, dataframe_path=None):
+def start_api(ml_config, dataframe_path=None, debug=True):
     training.set_config(ml_config)
     training.set_dataset_path(dataframe_path)
     app = Flask(__name__)
     api = Api(app)
 
     api.add_resource(training.Training, "/training/<string:source>")
+
+    app.run(debug=debug)
