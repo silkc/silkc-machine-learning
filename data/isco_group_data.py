@@ -10,6 +10,6 @@ def get_skill_dataframe(db: mysql_connector.CMySQLConnection, table:str = 'isco_
     return sql_reader.read_sql_data_to_dataframe(db, table, column_list)
 
 if __name__ == "__main__":
-    db = sql_reader.connect_to_database('localhost', 'root', 'root', 'SILCK', 33061)
+    db = sql_reader.connect_to_database('localhost', 'root', 'root', 'silck', 8889)
     print(get_skill_list(db))
     print(get_skill_dataframe(db))
