@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from machine_learning.clustering import training_kmeans, save_model
 from data.preprocessing.text_features_extraction import extract_features_from_text
-from data.data_aggragator import get_aggregated_dataframe
+from data.data_aggragator import get_aggregate_dataframe
 import pandas as pd
 ml_config = {}
 dataset_path = ""
@@ -28,7 +28,7 @@ class Training(Resource):
             if source == "file":
                 dataframe = pd.read_csv(dataset_path)
             elif source == "database":
-                dataframe = get_aggregated_dataframe(db_connector)
+                dataframe = get_aggregate_dataframe(db_connector)
             features = extract_features_from_text(ml_config, dataframe,
                                                   ['occupation_preferred_label', 'occupation_description',
                                                    'isco_preferred_label', 'isco_group_description',
