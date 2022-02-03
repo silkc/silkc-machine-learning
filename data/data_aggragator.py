@@ -15,5 +15,5 @@ def get_aggregated_dataframe(db: mysql_connector.CMySQLConnection) -> pd.DataFra
     return dataframe
 
 if __name__ == "__main__":
-    db = sql_reader.connect_to_database('localhost', 'root', 'root', 'SILCK', 33061)
+    db = sql_reader.connect_to_database('localhost', 'root', 'marcosql2022', 'silck', 3306)
     print(get_aggregated_dataframe(db))
