@@ -2,6 +2,7 @@ import json
 import argparse
 import config.config_loading
 from data import sql_reader
+from data.data_aggragator import get_aggregated_dataframe
 import pandas as pd
 from data.preprocessing.text_features_extraction import extract_features_from_text
 from machine_learning.clustering import training_kmeans, save_model
@@ -17,13 +18,13 @@ args.add_argument('--api', help="Activate the api", required=False, action="stor
 parsed = args.parse_args()
 
 #%% get configuration
-#db_conf = config.config_loading.get_configuration(parsed.database_configuration)
+db_conf = config.config_loading.get_configuration(parsed.database_configuration)
 
 #%% First step is dedicated to obtain all the data from the database
 #%% create the dictionary that push all together.
 
 #%% Connect to the database
-#db = sql_reader.connect_to_database(db_conf['db_host'], db_conf['db_user'], db_conf['db_passwd'], db_conf['db_name'], db_conf['db_port'])
+db = sql_reader.connect_to_database(db_conf['db_host'], db_conf['db_user'], db_conf['db_passwd'], db_conf['db_name'], db_conf['db_port'])
 
 #%% Opening Machine Learning configuration
 with open(parsed.machine_learning_configuration, 'r') as config_file:
@@ -35,7 +36,7 @@ if parsed.train:
     if parsed.dataset is not None:
         dataframe = pd.read_csv(parsed.dataset)
     else:
-        dataframe = "dataset" #TODO get data from SQL
+        dataframe = get_aggregated_dataframe(db)
     features = extract_features_from_text(ml_config, dataframe, ['occupation_preferred_label', 'occupation_description',
                                                               'isco_preferred_label', 'isco_group_description',
                                                               'occupation_skill_skill_type'], "english", True,
