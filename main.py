@@ -2,11 +2,11 @@ import json
 import argparse
 import config.config_loading
 from data import sql_reader
-from data.data_aggragator import get_aggregated_dataframe
+from data.data_aggragator import get_aggregate_dataframe
 import pandas as pd
 from data.preprocessing.text_features_extraction import extract_features_from_text
 from machine_learning.clustering import training_kmeans, save_model
-
+from data import sql_reader
 from api.api import start_api
 
 args = argparse.ArgumentParser()
@@ -36,17 +36,18 @@ if parsed.train:
     if parsed.dataset is not None:
         dataframe = pd.read_csv(parsed.dataset)
     else:
-        dataframe = get_aggregated_dataframe(db)
+        dataframe = get_aggregate_dataframe(db)
+    print("Extract features")
     features = extract_features_from_text(ml_config, dataframe, ['occupation_preferred_label', 'occupation_description',
                                                               'isco_preferred_label', 'isco_group_description',
                                                               'occupation_skill_skill_type'], "english", True,
                                           "hashing")
-
-
+    print("Training the model")
     km = training_kmeans(ml_config, features)
+    print("save the model")
     save_model(ml_config, km)
 elif parsed.api:
     if parsed.dataset is not None:
-        start_api(ml_config=ml_config, dataframe_path=parsed.dataset)
+        start_api(ml_config=ml_config, db_connector=db, dataframe_path=parsed.dataset)
     else:
-        start_api(ml_config=ml_config)
+        start_api(ml_config=ml_config, db_connector=db)
