@@ -30,6 +30,10 @@ def query_to_dataframe(db: mysql_connector.CMySQLConnection, query: str) -> pd.D
     dataframe = pd.read_sql(query, db)
     return dataframe
 
+def execute_query(db: mysql_connector.CMySQLConnection, query: str) -> None:
+    cursor = db.cursor()
+    cursor.execute(query)
+
 if __name__ == "__main__":
     connect_to_database('localhost', 'root', 'root', port=33061)
     db = connect_to_database('localhost', 'root', 'root', 'SILCK', 33061)
