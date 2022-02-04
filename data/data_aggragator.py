@@ -18,8 +18,6 @@ def get_aggregated_dataframe(db: mysql_connector.CMySQLConnection) -> pd.DataFra
     return dataframe
 
 def get_aggregate_dataframe(db: mysql_connector.CMySQLConnection) -> pd.DataFrame:
-    #TODO get values from view
-
     # drop aggregate view if exist
     query = 'DROP VIEW IF EXISTS aggregate'
     sql_reader.execute_query(db, query)
@@ -41,5 +39,5 @@ def get_aggregate_dataframe(db: mysql_connector.CMySQLConnection) -> pd.DataFram
 
 if __name__ == "__main__":
     db = sql_reader.connect_to_database('localhost', 'root', 'root', 'silck', 8889)
-    #print(get_aggregated_dataframe(db))
-    print(get_aggregate_dataframe(db))
+    #print(get_aggregated_dataframe(db)) # Select
+    print(get_aggregate_dataframe(db)) # View
