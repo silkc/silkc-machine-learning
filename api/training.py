@@ -37,10 +37,11 @@ class Training(Resource):
 
             km = training_kmeans(ml_config, features)
             save_model(ml_config, km)
-            response['status'] = 201
+            response['status'] = 201 # model created corrected
             response['response']['message'] = "The model was successfully created"
             response['response']['model_path'] = ml_config['api_configuration']['model_path']
             response['response']['extractor_path'] = ml_config['api_configuration']['extractor_path']
+            # TODO insert the metrics from test
         else:
             response['status'] = 404
             response['response']['message'] = "Model can be created because the source is not recognized"
