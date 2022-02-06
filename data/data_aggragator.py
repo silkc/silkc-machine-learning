@@ -1,18 +1,26 @@
 import mysql.connector as mysql_connector
 import pandas as pd
-from data import sql_reader
+import sql_reader
 
-debug: bool = True
-limit: int = 750
+debug: bool = False
+limit: int = 0
 
 def get_aggregated_dataframe(db: mysql_connector.CMySQLConnection) -> pd.DataFrame:
 
-    query = f"SELECT occupation.id, occupation.preferred_label, occupation.hidden_labels, occupation.description, " + \
-       "isco_group.concept_type, isco_group.code, isco_group.preferred_label AS isco_preferred_label, " + \
-       "isco_group.description AS isco_description, occupation_skill.relation_type, occupation_skill.skill_type, " + \
-       "training.description AS training_description, training.is_online, training.name, training_skill.is_required, training_skill.is_to_acquire " + \
-        "FROM occupation JOIN isco_group JOIN occupation_skill JOIN training JOIN training_skill " + \
-        "WHERE occupation.isco_group_id = isco_group.id or occupation_skill.occupation_id = occupation.id or training_skill.training_id = training.id"
+    # Get data on the association of skills, occupations, trainings and users.
+    # We do not get into details such as the score given by other users to a training
+    # or the previous searches or skills of other, similar, users. Other information like
+    # the list of jobs and trainings of other users is already available.
+    query = f"SELECT tr.id, tr.euro_price, tr.start_at, tr.end_at, tr.is_online, " + \
+             "tr.is_online_monitored, tr.is_presential, tr.score, tr.longitude, tr.latitude, " + \
+             "tr.duration_time_to_seconds, tr.avg_mark, tr.total_mark, tr.language, " + \
+             "tr.is_certified, ut.user_id, uo.occupation_id as user_occupation_is, " + \
+             "os.occupation_id as skill_occupation_id, os.skill_id, os.relation_type " + \
+             "FROM training tr JOIN training_skill ts ON tr.id = ts.training_id " + \
+             "JOIN occupation_skill os ON ts.skill_id = os.skill_id " + \
+             "JOIN user_training ut ON tr.id = ut.training_id " + \
+             "JOIN user_occupation uo ON ut.user_id = uo.user_id " + \
+             "WHERE tr.is_validated = 1 AND tr.is_rejected = 0"
     dataframe = sql_reader.query_to_dataframe(db=db, query=query)
 
     return dataframe
@@ -23,12 +31,16 @@ def get_aggregate_dataframe(db: mysql_connector.CMySQLConnection) -> pd.DataFram
     sql_reader.execute_query(db, query)
     # create aggregate view
     query = f'CREATE VIEW aggregate AS \n' + \
-            "SELECT occupation.id, occupation.preferred_label AS occupation_preferred_label, occupation.hidden_labels, occupation.description AS occupation_description, " + \
-            "isco_group.concept_type, isco_group.code, isco_group.preferred_label AS isco_preferred_label, " + \
-            "isco_group.description AS isco_group_description, occupation_skill.relation_type, occupation_skill.skill_type AS occupation_skill_skill_type, " + \
-            "training.description AS training_description, training.is_online, training.name, training_skill.is_required, training_skill.is_to_acquire " + \
-            "FROM occupation JOIN isco_group JOIN occupation_skill JOIN training JOIN training_skill " + \
-            "WHERE occupation.isco_group_id = isco_group.id or occupation_skill.occupation_id = occupation.id or training_skill.training_id = training.id"
+             "SELECT tr.id, tr.euro_price, tr.start_at, tr.end_at, tr.is_online, " + \
+             "tr.is_online_monitored, tr.is_presential, tr.score, tr.longitude, tr.latitude, " + \
+             "tr.duration_time_to_seconds, tr.avg_mark, tr.total_mark, tr.language, " + \
+             "tr.is_certified, ut.user_id, uo.occupation_id as user_occupation_is, " + \
+             "os.occupation_id as skill_occupation_id, os.skill_id, os.relation_type " + \
+             "FROM training tr JOIN training_skill ts ON tr.id = ts.training_id " + \
+             "JOIN occupation_skill os ON ts.skill_id = os.skill_id " + \
+             "JOIN user_training ut ON tr.id = ut.training_id " + \
+             "JOIN user_occupation uo ON ut.user_id = uo.user_id " + \
+             "WHERE tr.is_validated = 1 AND tr.is_rejected = 0"
     sql_reader.execute_query(db, query)
     if debug:
         query = f'SELECT * FROM aggregate LIMIT {limit}'
