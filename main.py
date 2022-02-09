@@ -2,7 +2,7 @@ import json
 import argparse
 import config.config_loading
 from data import sql_reader
-from data.data_aggragator import get_aggregate_dataframe
+from data.data_aggregator import get_aggregate_dataframe
 import pandas as pd
 from data.preprocessing.text_features_extraction import extract_features_from_text
 from machine_learning.clustering import training_kmeans, save_model
