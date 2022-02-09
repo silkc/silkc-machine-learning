@@ -32,20 +32,32 @@ with open(parsed.machine_learning_configuration, 'r') as config_file:
 
 #%% Create the base configuration
 if parsed.train:
-    print("Preparing the training of the model")
+    print("Preparing model training...")
     if parsed.dataset is not None:
         dataframe = pd.read_csv(parsed.dataset)
     else:
         dataframe = get_aggregate_dataframe(db)
-    print("Extract features")
-    features = extract_features_from_text(ml_config, dataframe, ['occupation_preferred_label', 'occupation_description',
-                                                              'isco_preferred_label', 'isco_group_description',
-                                                              'occupation_skill_skill_type'], "english", True,
-                                          "hashing")
-    print("Training the model")
+    print("Extracting features...")
+    features = extract_features_from_text(
+        ml_config,
+        dataframe,
+        [
+            'training_id',
+            'user_id',
+            'user_occupation_id',
+            'skill_id',
+            'skill_occupation_id',
+            'relation_type'
+        ],
+        "english",
+        True,
+        "hashing"
+    )
+    print("Training model...")
     km = training_kmeans(ml_config, features)
-    print("save the model")
+    print("Saving model...")
     save_model(ml_config, km)
+    print("Training completed.")
 elif parsed.api:
     if parsed.dataset is not None:
         start_api(ml_config=ml_config, db_connector=db, dataframe_path=parsed.dataset)
