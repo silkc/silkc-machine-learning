@@ -1,15 +1,16 @@
 from flask_restful import Resource
-from machine_learning.clustering import training_kmeans, save_model
-from data.preprocessing.text_features_extraction import extract_features_from_text
 from data.data_aggregator import get_aggregate_dataframe
+from data.preprocessing import data_organization
+from machine_learning.classification import train_classifier
 import pandas as pd
-ml_config = {}
+
+configuration = {}
 dataset_path = ""
 db_connector = None
 
 def set_config(config):
-    global ml_config
-    ml_config = config
+    global configuration
+    configuration = config
 
 def set_dataset_path(path):
     global dataset_path
@@ -29,18 +30,19 @@ class Training(Resource):
                 dataframe = pd.read_csv(dataset_path)
             elif source == "database":
                 dataframe = get_aggregate_dataframe(db_connector)
-            features = extract_features_from_text(ml_config, dataframe,
-                                                  ['occupation_preferred_label', 'occupation_description',
-                                                   'isco_preferred_label', 'isco_group_description',
-                                                   'occupation_skill_skill_type'], "english", True,
-                                                  "hashing")
-
-            km = training_kmeans(ml_config, features)
-            save_model(ml_config, km)
+            
+            dataframe, target = data_organization.encode_target(configuration['save_path'], train_config=configuration['train'], dataframe=dataframe)
+            dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
+            
+            train_classifier(configuration['train'], configuration['save_path'], data=dataframe)
+            
             response['status'] = 201 # model created corrected
-            response['response']['message'] = "The model was successfully created"
-            response['response']['model_path'] = ml_config['api_configuration']['model_path']
-            response['response']['extractor_path'] = ml_config['api_configuration']['extractor_path']
+            response['response']['message'] = f"The model was successfully created with the use of the {source}"
+            response['response']['model_path'] = configuration['save_path']['model'] + configuration['save_path']['model_name']
+            response['response']['mapping_paths'] = [
+                configuration['save_path']['mapping']['target'] + configuration['save_path']['mapping']['target_name'],
+                configuration['save_path']['mapping']['relation'] + configuration['save_path']['mapping']['relation_name']
+            ]
             # TODO insert the metrics from test
         else:
             response['status'] = 404
