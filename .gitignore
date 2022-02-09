@@ -136,3 +136,5 @@ machine_learning/save_model/
 data/export/
 
 *.sav
+
+config/*.json

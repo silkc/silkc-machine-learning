@@ -2,6 +2,6 @@
   "db_host": "localhost",
   "db_user": "root",
   "db_passwd": "root",
-  "db_name": "silck",
-  "db_port": 8889
+  "db_name": "silkc",
+  "db_port": 3306
 }
