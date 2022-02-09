@@ -25,7 +25,7 @@ db = sql_reader.connect_to_database(configuration['database']['host'], configura
 
 #%% Create the base configuration
 if parsed.train:
-    print("Preparing the training of the model")
+    print("Preparing model training...")
     if parsed.dataset is not None:
         dataframe = pd.read_csv(parsed.dataset)
     else:
