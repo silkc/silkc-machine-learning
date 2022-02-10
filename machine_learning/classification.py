@@ -26,7 +26,7 @@ def train_classifier(model_config:dict, save_config:dict, data:pd.DataFrame):
     data.dropna(subset=model_config['input_columns'], how="any", inplace=True)
     data.to_csv('./dataframe.csv')
     
-    train, test = train_test_split(data, test_size=0.2)
+    train, test = train_test_split(data, test_size=model_config['split_percentage'])
     
     train_features = train[model_config['input_columns']]
     train_features.is_copy = False
