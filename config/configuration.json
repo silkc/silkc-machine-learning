@@ -7,6 +7,11 @@
             "target_name": "target.pkl",
             "relation": "./store/mapping/",
             "relation_name": "relation.pkl"
+        },
+        "report": {
+            "base_path": "./store/report/",
+            "report_name": "classification_report.json",
+            "cf_name": "classification_confusion_matrix.pdf"
         }
     },
     "train":{
@@ -28,7 +33,13 @@
             "uri": "training"
         },
         "inference":{
-            "uri": "infer"
+            "uri": "infer",
+            "input_key": [
+                "user_occupation_id",
+                "skill_occupation_id",
+                "skill_id",
+                "relation_type_int"
+            ]
         }
     },
     "database":{
