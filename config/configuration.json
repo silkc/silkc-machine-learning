@@ -22,6 +22,7 @@
             "relation_type_int"
         ],
         "target_column": "training_id",
+        "split_percentage": 0.2,
         "classificator":{
             "name": "DecisionTree",
             "random_state": 92,
