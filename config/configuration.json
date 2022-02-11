@@ -1,0 +1,53 @@
+{
+    "save_path": {
+        "model": "./store/model/",
+        "model_name": "decision_tree.pkl",
+        "mapping": {
+            "target": "./store/mapping/",
+            "target_name": "target.pkl",
+            "relation": "./store/mapping/",
+            "relation_name": "relation.pkl"
+        },
+        "report": {
+            "base_path": "./store/report/",
+            "report_name": "classification_report.json",
+            "cf_name": "classification_confusion_matrix.pdf"
+        }
+    },
+    "train":{
+        "input_columns":[
+            "user_occupation_id",
+            "skill_occupation_id",
+            "skill_id",
+            "relation_type_int"
+        ],
+        "target_column": "training_id",
+        "split_percentage": 0.2,
+        "classificator":{
+            "name": "DecisionTree",
+            "random_state": 92,
+            "min_samples_split": 2
+        }
+    },
+    "api":{
+        "training":{
+            "uri": "training"
+        },
+        "inference":{
+            "uri": "infer",
+            "input_key": [
+                "user_occupation_id",
+                "skill_occupation_id",
+                "skill_id",
+                "relation_type_int"
+            ]
+        }
+    },
+    "database":{
+        "host": "localhost",
+        "user": "root",
+        "passwd": "root",
+        "name": "silkc",
+        "port": 3306
+    }
+}

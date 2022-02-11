@@ -9,6 +9,9 @@ def get_training_list(db: mysql_connector.CMySQLConnection, table:str = 'trainin
 def get_training_dataframe(db: mysql_connector.CMySQLConnection, table:str = 'training', column_list:str = '*') -> pd.DataFrame:
     return sql_reader.read_sql_data_to_dataframe(db, table, column_list)
 
+def get_training_ids(db: mysql_connector.CMySQLConnection, table:str = 'trraining', column: str = 'id') -> pd.DataFrame:
+    return get_training_dataframe(db, table, column_list=column)
+
 if __name__ == "__main__":
     db = sql_reader.connect_to_database('localhost', 'root', 'root', 'SILCK', 33061)
     print(get_training_list(db))
