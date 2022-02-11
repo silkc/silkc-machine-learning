@@ -149,3 +149,5 @@ dataframe.csv
 extracted/extraction.csv
 
 *.pkl
+
+store/report/
