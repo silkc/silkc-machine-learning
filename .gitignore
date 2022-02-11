@@ -147,3 +147,5 @@ config/ml_config.json
 dataframe.csv
 
 extracted/extraction.csv
+
+*.pkl
