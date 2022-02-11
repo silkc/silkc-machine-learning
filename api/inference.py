@@ -40,7 +40,7 @@ class Inference(Resource):
             dataframe = pd.DataFrame(data['input'], index=[0]) #TODO use the mapping for the relation_type
             inference, i_time = infer_classifier(config=configuration, input=dataframe)
             response['status'] = 200
-            response['response']['result'] = int(inference[0])
+            response['response']['result'] = inference.tolist()
             response['response']['message'] = "Classification model executed"
             response['response']['accuracy'] = report['precision']['accuracy']
             response['response']['inference_time'] = i_time
