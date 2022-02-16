@@ -151,3 +151,7 @@ extracted/extraction.csv
 *.pkl
 
 store/report/
+
+.vscode/
+
+extracted/

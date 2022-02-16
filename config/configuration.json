@@ -1,46 +1,61 @@
 {
     "save_path": {
-        "model": "./store/model/",
-        "model_name": "decision_tree.pkl",
+        "model": {
+            "base_path": "./store/model/"
+        },
         "mapping": {
-            "target": "./store/mapping/",
-            "target_name": "target.pkl",
-            "relation": "./store/mapping/",
-            "relation_name": "relation.pkl"
+            "base_path": "./store/mapping/",
+            "target":  "target.pkl",
+            "relation": "relation.pkl"
         },
         "report": {
             "base_path": "./store/report/",
-            "report_name": "classification_report.json",
-            "cf_name": "classification_confusion_matrix.pdf"
+            "classification":{
+                "textual": "classification_report.json",
+                "confusion_matrix": "classification_confusion_matrix.pdf"
+            }
         }
     },
-    "train":{
-        "input_columns":[
-            "user_occupation_id",
-            "skill_occupation_id",
-            "skill_id",
-            "relation_type_int"
-        ],
-        "target_column": "training_id",
-        "split_percentage": 0.2,
-        "classificator":{
-            "name": "DecisionTree",
-            "random_state": 92,
-            "min_samples_split": 2
+    "model":{
+        "occupation":{
+            "name": "occupation_tree.pkl",
+            "input_columns":["skill_occupation_id"],
+            "target_column": "training_id",
+            "train":{
+                "split_percentage": 0.2,
+                "random_state": 92,
+                "min_samples_split": 2
+            }
+        },
+        "skill": {
+            "name": "skill_tree.pkl",
+            "input_columns":["skill_to_train_id"],
+            "target_column": "training_id",
+            "train":{
+                "split_percentage": 0.2,
+                "random_state": 92,
+                "min_samples_split": 2
+            }
         }
     },
     "api":{
         "training":{
-            "uri": "training"
+            "base_uri": "training",
+            "occupation": "occupation",
+            "skill": "skill"
+
         },
         "inference":{
-            "uri": "infer",
-            "input_key": [
-                "user_occupation_id",
-                "skill_occupation_id",
-                "skill_id",
-                "relation_type_int"
-            ]
+            "base_uri": "infer",
+            "occupation":{
+                "input_keys": ["skill_occupation_id"],
+                "uri": "occupation"
+            },
+            "skill": {
+                "input_keys": ["skill_to_train_id"],
+                "uri": "skill"
+            }
+            
         }
     },
     "database":{

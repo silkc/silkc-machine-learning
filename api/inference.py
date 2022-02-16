@@ -1,9 +1,8 @@
-from distutils.command.config import config
-from urllib import response
 from flask_restful import Resource
 from flask import request
 from machine_learning.classification import infer_classifier
 import pandas as pd
+import numpy as np
 import os
 
 configuration = {}
@@ -17,6 +16,9 @@ def set_db(db):
     global db_connector
     db_connector = db
     
+
+#TODO adapt to the multiple models    
+
 class Inference(Resource):
     
     def post(self):
@@ -32,19 +34,30 @@ class Inference(Resource):
         }
         
         data = request.get_json(force=True)
-        keys = configuration['api']['inference']['input_key']
-        if all(key in data['input'] for key in keys):
-            # Opening the classification report:
-            report = pd.read_json(os.path.join(configuration['save_path']['report']['base_path'], configuration['save_path']['report']['report_name']))
-            
-            dataframe = pd.DataFrame(data['input'], index=[0]) #TODO use the mapping for the relation_type
-            inference, i_time = infer_classifier(config=configuration, input=dataframe)
-            response['status'] = 200
-            response['response']['result'] = inference.tolist()
-            response['response']['message'] = "Classification model executed"
-            response['response']['accuracy'] = report['precision']['accuracy']
-            response['response']['inference_time'] = i_time
+        # get the model_type from the query
+        if 'model' in data.keys():
+            if data['model'] in ['occupation', 'skill']:
+                model_type = data['model']
+                keys = configuration['api']['inference'][model_type]['input_keys']
+                if all(key in data['input'] for key in keys):
+                    
+                    # Opening the classification report:
+                    report = pd.read_json(os.path.join(configuration['save_path']['report']['base_path'], configuration['model'][model_type]['name'].split('.')[0], configuration['save_path']['report']['classification']['textual']))
+                    
+                    dataframe = pd.DataFrame(data['input'], index=[0]) #TODO use the mapping for the relation_type in future development
+                    inference, i_time = infer_classifier(save_config=configuration['save_path'], model_config=configuration['model'][model_type], input=dataframe)
+                    response['status'] = 200
+                    response['response']['result'] = inference.tolist()
+                    response['response']['message'] = "Classification model executed"
+                    response['response']['accuracy'] = float(report['precision']['accuracy'])
+                    response['response']['inference_time'] = i_time
+                else:
+                    response['status'] = 406
+                    response['response']['message'] = "The input keys in the request does not respect what is expected from the ML algorithm"
+            else:
+                response['status'] = 406
+                response['response']['message'] = "The specified model is not configured"
         else:
             response['status'] = 406
-            response['response']['message'] = "The keys in the request does not respect what is expected from the ML algorithm"
+            response['response']['message'] = "You have to specify the model in the body of the request"
         return response

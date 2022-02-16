@@ -21,16 +21,16 @@ def encode(dataframe: pd.DataFrame, column:str, save_mapping_path:str, use_saved
     return dataframe, targets
 
 def encode_target(save_config:dict, train_config: dict, dataframe: pd.DataFrame):
-    if os.path.exists(save_config['mapping']['target']):
-        return encode(dataframe=dataframe, column=train_config['target_column'], use_saved=True, save_mapping_path=os.path.join(save_config['mapping']['target'], save_config['mapping']['target_name']))
+    if os.path.exists(os.path.join(save_config['mapping']['base_path'], save_config['mapping']['target'])):
+        return encode(dataframe=dataframe, column=train_config['target_column'], use_saved=True, save_mapping_path=os.path.join(save_config['mapping']['base_path'], save_config['mapping']['target']))
     else:
-        return encode(dataframe=dataframe, column=train_config['target_column'], save_mapping_path=os.path.join(save_config['mapping']['target'], save_config['mapping']['target_name']))
+        return encode(dataframe=dataframe, column=train_config['target_column'], save_mapping_path=os.path.join(save_config['mapping']['base_path'], save_config['mapping']['target']))
 
 def encode_relation(save_config:dict, dataframe: pd.DataFrame):
-    if os.path.exists(save_config['mapping']['relation']):
-        return encode(dataframe=dataframe, column="relation_type", use_saved=True, save_mapping_path=os.path.join(save_config['mapping']['relation'], save_config['mapping']['relation_name']))
+    if os.path.exists(save_config['mapping']['base_path'], save_config['mapping']['relation']):
+        return encode(dataframe=dataframe, column="relation_type", use_saved=True, save_mapping_path=os.path.join(save_config['mapping']['base_path'], save_config['mapping']['relation']))
     else:
-        return encode(dataframe=dataframe, column="relation_type", save_mapping_path=os.path.join(save_config['mapping']['relation'], save_config['mapping']['relation_name']))
+        return encode(dataframe=dataframe, column="relation_type", save_mapping_path=os.path.join(save_config['mapping']['base_path'], save_config['mapping']['relation']))
 
 def save_ecoding(save_path:str, encodered_dict:dict) -> None:
     
