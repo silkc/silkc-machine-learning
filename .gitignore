@@ -153,3 +153,5 @@ extracted/extraction.csv
 store/report/
 
 .vscode/
+
+extracted/
