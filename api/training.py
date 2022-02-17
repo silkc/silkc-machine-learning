@@ -30,7 +30,11 @@ class Training(Resource):
         if model in ['occupation', 'skill']:
             if source in ['file', 'database']:
                 if model == 'occupation':
-                    if source == 'file':
+                    if source == 'file' and datasets_path is None:
+                        response['status'] = 500 
+                        response['response']['message'] = f"The file for the training has to be specified"
+                        return response
+                    elif source == 'file' and datasets_path is not None:
                         dataframe = pd.read_csv(os.path.join(datasets_path, 'occupation.csv'))
                     elif source == 'database':
                         dataframe = o_aggregated(db_connector)
@@ -45,7 +49,11 @@ class Training(Resource):
                         configuration['save_path']['mapping']['base_path'] + configuration['save_path']['mapping']['relation']
                     ]
                 elif model == 'skill':
-                    if source == 'file':
+                    if source == 'file' and datasets_path is None:
+                        response['status'] = 500 
+                        response['response']['message'] = f"The file for the training has to be specified"
+                        return response
+                    elif source == 'file' and datasets_path is not None:
                         dataframe = pd.read_csv(os.path.join(datasets_path, 'skill.csv'))
                     elif source == 'database':
                         dataframe = s_aggregated(db_connector)
