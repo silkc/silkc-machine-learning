@@ -23,8 +23,14 @@ def train_classifier(model_config:dict, save_config:dict, data:pd.DataFrame):
     """
     classifier = DecisionTreeClassifier(min_samples_split=model_config['train']['min_samples_split'], random_state=model_config['train']['random_state'])
     
+    previous_data_cardinality = len(data)
+    
     data.dropna(subset=model_config['input_columns'], how="any", inplace=True)
     data.to_csv('./dataframe.csv')
+    
+    new_data_cardinality = len(data)
+    
+    print("The NaN data are:", previous_data_cardinality - new_data_cardinality)
     
     # TODO insert the number of data that was deleted from the dataframe 
     
