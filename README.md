@@ -36,46 +36,25 @@ Open `database.json` and configure a read access to the database used by the `si
 ### Training
 
 To run, position yourself in the base folder of the project and launch:
-`python3 main.py -dbc config/database.json -mlc config/ml_config.json --train`
+```
+python3 main.py --config config/configuration.json --train occupation
+python3 main.py --config config/configuration.json --train skill
+```
 
-This will query the database to aggregate the data, and write the trained model file in the folder defined in `ml_config.json`.
+This will query the database to aggregate the data, and write the trained model file in the folder defined in `configuration.json`.
 It also provides you with feedback on several quality indicators for the algorithm as follows...
 ```
-$ python3 main.py -dbc config/database.json -mlc config/ml_config.json --train
-Preparing model training...
-Extracting features...
-Training model...
-Init 1/1 with method k-means++
-Inertia for init 1/1: 6.0
-[MiniBatchKMeans] Reassigning 1 cluster centers.
-Minibatch step 1/100: mean batch inertia: 0.6666666666666666
-Minibatch step 2/100: mean batch inertia: 1.3333333333333333, ewa inertia: 1.3333333333333333
-Minibatch step 3/100: mean batch inertia: 1.0136054421768708, ewa inertia: 1.0136054421768708
-Minibatch step 4/100: mean batch inertia: 0.48148148148148145, ewa inertia: 0.48148148148148145
-Minibatch step 5/100: mean batch inertia: 0.58203125, ewa inertia: 0.58203125
-Minibatch step 6/100: mean batch inertia: 0.3922902494331066, ewa inertia: 0.3922902494331066
-Minibatch step 7/100: mean batch inertia: 0.4398148148148149, ewa inertia: 0.4398148148148149
-Minibatch step 8/100: mean batch inertia: 0.1203231292517007, ewa inertia: 0.1203231292517007
-Minibatch step 9/100: mean batch inertia: 0.8799048751486326, ewa inertia: 0.8799048751486326
-Minibatch step 10/100: mean batch inertia: 0.5673469387755102, ewa inertia: 0.5673469387755102
-Minibatch step 11/100: mean batch inertia: 0.5291666666666667, ewa inertia: 0.5291666666666667
-Minibatch step 12/100: mean batch inertia: 0.3192148760330578, ewa inertia: 0.3192148760330578
-Minibatch step 13/100: mean batch inertia: 0.6069628229363578, ewa inertia: 0.6069628229363578
-Minibatch step 14/100: mean batch inertia: 0.24016403947199794, ewa inertia: 0.24016403947199794
-Minibatch step 15/100: mean batch inertia: 0.2661682686602587, ewa inertia: 0.2661682686602587
-Minibatch step 16/100: mean batch inertia: 0.5908539944903582, ewa inertia: 0.5908539944903582
-Minibatch step 17/100: mean batch inertia: 0.12515560662644834, ewa inertia: 0.12515560662644834
-Minibatch step 18/100: mean batch inertia: 0.4896296296296297, ewa inertia: 0.4896296296296297
-Converged (lack of improvement in inertia) at step 18/100
-Saving model...
-Training completed.
+$ python3 main.py --config config/configuration.json --train occupation
+Preparing the OCCUPATION MODEL for the training
+The NaN data are: 0
+Done training OCCUPATION MODEL
 ```
 
 To launch the training process as a REST API, use the `--api` argument.
 
 This should show feedback with connection details, like so:
 ```
-$ python3 main.py -dbc config/database.json -mlc config/ml_config.json --api
+$ python3 main.py --config config/configuration.json --api
  * Serving Flask app 'api.api' (lazy loading)
  * Environment: production
    WARNING: This is a development server. Do not use it in a production deployment.
@@ -91,7 +70,31 @@ Postman to trigger the model training through the database input.
 
 ### API/Inference
 
-To be documented...
+Once the API is launched above, you can issue a POST request to `http://127.0.0.1:5000/infer`
+with a request body of
+```
+{
+    "model": "occupation",
+    "input": { 
+        "skill_occupation_id": 2154
+    } 
+}
+```
+
+This will generate a JSON result of the following type (to be improved):
+```
+{
+    "status": 200,
+    "response": {
+        "message": "Classification model executed",
+        "result": [
+            "4,5,6,7"
+        ],
+        "accuracy": 0.14876033060000002,
+        "inference_time": 0.0009620189666748047
+    }
+}
+```
 
 ## Notes
 
