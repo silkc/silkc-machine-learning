@@ -1,8 +1,9 @@
 from flask_restful import Resource
 from data.occupation.data_aggregator import get_aggregated_dataframe as o_aggregated
 from data.skill.data_aggregator import get_aggregated_dataframe as s_aggregated
-from data.preprocessing import data_organization
-from machine_learning.classification import train_classifier
+from data.preprocessing import encoding, dataset_generation
+from data.training_data_reader import get_training_ids
+from machine_learning.multiclassification import train_classifier
 import pandas as pd
 import os 
 
@@ -38,9 +39,12 @@ class Training(Resource):
                         dataframe = pd.read_csv(os.path.join(datasets_path, 'occupation.csv'))
                     elif source == 'database':
                         dataframe = o_aggregated(db_connector)
-                    dataframe, target = data_organization.encode_target(configuration['save_path'], train_config=configuration['model']['occupation'], dataframe=dataframe)
+                    training_list = get_training_ids(db=db_connector)
+                    training_list = [str(i[0]) for i in training_list]
+                    dataframe = dataset_generation.adding_columns(configuration['model']['occupation'], dataframe=dataframe, columns_name=training_list)
                     #dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
-                    train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe)
+                    train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe, target_column_name=training_list)
+                    
                     response['status'] = 201 # model created corrected
                     response['response']['message'] = f"The model was successfully created with the use of the {source}"
                     response['response']['model_path'] = configuration['save_path']['model']['base_path'] + configuration['model']['occupation']['name']
@@ -57,9 +61,11 @@ class Training(Resource):
                         dataframe = pd.read_csv(os.path.join(datasets_path, 'skill.csv'))
                     elif source == 'database':
                         dataframe = s_aggregated(db_connector)
-                    dataframe, target = data_organization.encode_target(configuration['save_path'], train_config=configuration['model']['skill'], dataframe=dataframe)
+                    training_list = get_training_ids(db=db_connector)
+                    training_list = [str(i[0]) for i in training_list]
+                    dataframe = dataset_generation.adding_columns(configuration['model']['occupation'], dataframe=dataframe, columns_name=training_list)
                     #dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
-                    train_classifier(configuration['model']['skill'], configuration['save_path'], data=dataframe)
+                    train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe, target_column_name=training_list)
                 
                     response['status'] = 201 # model created corrected
                     response['response']['message'] = f"The model was successfully created with the use of the {source}"
