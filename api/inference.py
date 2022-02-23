@@ -1,6 +1,8 @@
+import enum
 from flask_restful import Resource
 from flask import request
-from machine_learning.classification import infer_classifier
+from machine_learning.multiclassification import infer_classifier
+from data.training_data_reader import get_training_ids
 import pandas as pd
 import numpy as np
 import os
@@ -35,6 +37,8 @@ class Inference(Resource):
         
         data = request.get_json(force=True)
         # get the model_type from the query
+        training_list = get_training_ids(db=db_connector)
+        training_list = [str(i[0]) for i in training_list]
         if 'model' in data.keys():
             if data['model'] in ['occupation', 'skill']:
                 model_type = data['model']
@@ -45,11 +49,19 @@ class Inference(Resource):
                     report = pd.read_json(os.path.join(configuration['save_path']['report']['base_path'], configuration['model'][model_type]['name'].split('.')[0], configuration['save_path']['report']['classification']['textual']))
                     
                     dataframe = pd.DataFrame(data['input'], index=[0]) #TODO use the mapping for the relation_type in future development
-                    inference, i_time = infer_classifier(save_config=configuration['save_path'], model_config=configuration['model'][model_type], input=dataframe)
+                    inference, inference_prob, i_time = infer_classifier(save_config=configuration['save_path'], model_config=configuration['model'][model_type], input=dataframe)
+                    inference_list = [name for index, name in enumerate(training_list) if inference[0][index] == 1.0]
+                    inference_prob_list = [name for index, name in enumerate(inference_prob.tolist()[0]) if inference[0][index] == 1.0]
+                    inference_dict = {}
+                    for index, value in enumerate(inference_list):
+                        inference_dict[int(value)] = inference_prob_list[index] 
+                    
+                    inference_dict = sorted(inference_dict.items(), key=lambda kv:(kv[1], kv[0]))
+                    
                     response['status'] = 200
-                    response['response']['result'] = inference.tolist()
+                    response['response']['result'] = inference_dict
                     response['response']['message'] = "Classification model executed"
-                    response['response']['accuracy'] = float(report['precision']['accuracy'])
+                    response['response']['score'] = report.to_dict('records')[0]
                     response['response']['inference_time'] = i_time
                 else:
                     response['status'] = 406

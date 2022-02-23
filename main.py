@@ -1,14 +1,15 @@
-from ast import parse
-from ctypes.wintypes import tagRECT
 import os
 import argparse
+
+from pyparsing import col
 from api.api import start_api
 import config.config_loading
 from data import sql_reader
 from data.occupation.data_aggregator import get_aggregated_dataframe as o_aggregated
 from data.skill.data_aggregator import get_aggregated_dataframe as s_aggregated
-from data.preprocessing import data_organization
-from machine_learning.classification import train_classifier
+from data.preprocessing import encoding, dataset_generation
+from data.training_data_reader import get_training_ids
+from machine_learning.multiclassification import train_classifier
 import pandas as pd
 from data import sql_reader
 
@@ -32,18 +33,22 @@ if parsed.train in ['occupation', 'skill']:
             dataframe = pd.read_csv(os.path.join(parsed.datasets_path, 'occupation.csv'))
         else:
             dataframe = o_aggregated(db)
-        dataframe, target = data_organization.encode_target(configuration['save_path'], train_config=configuration['model']['occupation'], dataframe=dataframe)
+        training_list = get_training_ids(db=db)
+        training_list = [str(i[0]) for i in training_list]
+        dataframe = dataset_generation.adding_columns(configuration['model']['occupation'], dataframe=dataframe, columns_name=training_list)
         #dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
-        train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe)
+        train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe, target_column_name=training_list)
     elif parsed.train == 'skill':
         print("Preparing the SKILL MODEL for the training")
         if parsed.datasets_path is not None:
             dataframe = pd.read_csv(os.path.join(parsed.datasets_path, 'skill.csv'))
         else:
             dataframe = s_aggregated(db)
-        dataframe, target = data_organization.encode_target(configuration['save_path'], train_config=configuration['model']['skill'], dataframe=dataframe)
+        training_list = get_training_ids(db=db)
+        training_list = [str(i[0]) for i in training_list]
+        dataframe = dataset_generation.adding_columns(configuration['model']['occupation'], dataframe=dataframe, columns_name=training_list)
         #dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
-        train_classifier(configuration['model']['skill'], configuration['save_path'], data=dataframe)
+        train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe, target_column_name=training_list)
 elif parsed.train not in ['occupation', 'skill'] and parsed.train is not None:
     raise(NotImplementedError(f"The {parsed.train} is not recognized as authorized parameter"))
 if parsed.api:
