@@ -30,7 +30,6 @@ class Inference(Resource):
             "response": {
                 "message": "",
                 "result": 0,
-                "accuracy": 0.0,
                 "inference_time": 0
             }
         }
