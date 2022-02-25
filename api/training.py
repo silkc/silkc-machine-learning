@@ -63,9 +63,9 @@ class Training(Resource):
                         dataframe = s_aggregated(db_connector)
                     training_list = get_training_ids(db=db_connector)
                     training_list = [str(i[0]) for i in training_list]
-                    dataframe = dataset_generation.adding_columns(configuration['model']['occupation'], dataframe=dataframe, columns_name=training_list)
+                    dataframe = dataset_generation.adding_columns(configuration['model']['skill'], dataframe=dataframe, columns_name=training_list)
                     #dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
-                    train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe, target_column_name=training_list)
+                    train_classifier(configuration['model']['skill'], configuration['save_path'], data=dataframe, target_column_name=training_list)
                 
                     response['status'] = 201 # model created corrected
                     response['response']['message'] = f"The model was successfully created with the use of the {source}"
