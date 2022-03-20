@@ -38,6 +38,7 @@ if parsed.train in ['occupation', 'skill']:
         dataframe = dataset_generation.adding_columns(configuration['model']['occupation'], dataframe=dataframe, columns_name=training_list)
         #dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
         train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe, target_column_name=training_list)
+        print("> occupation model trained.")
     elif parsed.train == 'skill':
         print("Preparing the SKILL MODEL for the training")
         if parsed.datasets_path is not None:
@@ -46,11 +47,12 @@ if parsed.train in ['occupation', 'skill']:
             dataframe = s_aggregated(db)
         training_list = get_training_ids(db=db)
         training_list = [str(i[0]) for i in training_list]
-        dataframe = dataset_generation.adding_columns(configuration['model']['occupation'], dataframe=dataframe, columns_name=training_list)
+        dataframe = dataset_generation.adding_columns(configuration['model']['skill'], dataframe=dataframe, columns_name=training_list)
         #dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
-        train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe, target_column_name=training_list)
+        train_classifier(configuration['model']['skill'], configuration['save_path'], data=dataframe, target_column_name=training_list)
+        print("> skill model trained.")
 elif parsed.train not in ['occupation', 'skill'] and parsed.train is not None:
-    raise(NotImplementedError(f"The {parsed.train} is not recognized as authorized parameter"))
+    raise(NotImplementedError(f"'{parsed.train}' is not recognized as an authorized parameter to train"))
 if parsed.api:
     if parsed.datasets_path is not None:
         start_api(config=configuration, db_connector=db, dataframes_path=parsed.datasets_path)
