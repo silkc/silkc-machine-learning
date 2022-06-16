@@ -3,9 +3,9 @@ import pandas as pd
 
 def connect_to_database(host:str, username:str, password:str, database_name:str = None, port: int =3306) -> mysql_connector.CMySQLConnection:
     if database_name is None:
-        db = mysql_connector.connect(host=host, username=username, password=password, port=port)
+        db = mysql_connector.connect(host=host, username=username, password=password, port=port, buffered=True)
     else:
-        db = mysql_connector.connect(host=host, username=username, password=password, database=database_name, port=port)
+        db = mysql_connector.connect(host=host, username=username, password=password, database=database_name, port=port, buffered=True)
 
     return db
 
@@ -29,6 +29,10 @@ def read_sql_data_to_dataframe(db: mysql_connector.CMySQLConnection, table:str, 
 def query_to_dataframe(db: mysql_connector.CMySQLConnection, query: str) -> pd.DataFrame:
     dataframe = pd.read_sql(query, db)
     return dataframe
+
+def execute_query(db: mysql_connector.CMySQLConnection, query: str) -> None:
+    cursor = db.cursor()
+    cursor.execute(query)
 
 if __name__ == "__main__":
     connect_to_database('localhost', 'root', 'root', port=33061)

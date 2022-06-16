@@ -1,7 +1,0 @@
-{
-  "db_host": "localhost",
-  "db_user": "root",
-  "db_passwd": "root",
-  "db_name": "SILCK",
-  "db_port": 33061
-}

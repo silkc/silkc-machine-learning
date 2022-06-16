@@ -136,3 +136,22 @@ machine_learning/save_model/
 data/export/
 
 *.sav
+.vscode/launch.json
+
+config/api_config.json
+
+config/database.json
+
+config/ml_config.json
+
+dataframe.csv
+
+extracted/extraction.csv
+
+*.pkl
+
+store/report/
+
+.vscode/
+
+extracted/

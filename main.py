@@ -1,43 +1,69 @@
-import json
+import os
 import argparse
+
+from api.api import start_api
 import config.config_loading
 from data import sql_reader
+from data.occupation.data_aggregator import get_aggregated_dataframe as o_aggregated
+from data.skill.data_aggregator import get_aggregated_dataframe as s_aggregated
+from data.preprocessing import encoding, dataset_generation
+from data.training_data_reader import get_training_ids
+from data.total.data_aggregator import get_aggregated_dataframe as t_aggregated
+from machine_learning.total_multiclassification import train_classifier as ttc
+from machine_learning.multiclassification import train_classifier
 import pandas as pd
-from data.preprocessing.text_features_extraction import extract_features_from_text
-from machine_learning.clustering import training_kmeans, save_model
+from data import sql_reader
 
 args = argparse.ArgumentParser()
-args.add_argument('--database_configuration', '-dbc', type=str, help="The path to the configuration of the database connection", required=False)
-args.add_argument('--machine_learning_configuration', '-mlc', type=str, help="The path to the configuration of the machine learning")
-args.add_argument('--train', help="Activate the training for the machine learning model", required=False, action='store_true')
-args.add_argument('--dataset', help="Get the dataset from file", type=str, required=False)
+args.add_argument('--config', '-c', help="Loading the configuration for the entire system", required=True)
+args.add_argument('--train', help="Activate the training for the machine learning model, has to be in ['occupation', 'skill']", required=False, type=str)
+args.add_argument('--datasets_path', help="Get the dataset from folder", type=str, required=False)
+args.add_argument('--api', help="Activate the api", required=False, action="store_true")
 parsed = args.parse_args()
 
-#%% get configuration
-#db_conf = config.config_loading.get_configuration(parsed.database_configuration)
-
-#%% First step is dedicated to obtain all the data from the database
-#%% create the dictionary that push all together.
+configuration = config.config_loading.get_configuration(parsed.config)
 
 #%% Connect to the database
-#db = sql_reader.connect_to_database(db_conf['db_host'], db_conf['db_user'], db_conf['db_passwd'], db_conf['db_name'], db_conf['db_port'])
-
-#%% Opening Machine Learning configuration
-with open(parsed.machine_learning_configuration, 'r') as config_file:
-    ml_config = json.load(config_file)
+db = sql_reader.connect_to_database(configuration['database']['host'], configuration['database']['user'], configuration['database']['passwd'], configuration['database']['name'], configuration['database']['port'])
 
 #%% Create the base configuration
-if parsed.train:
-    print("Preparing the training of the model")
-    if parsed.dataset is not None:
-        dataframe = pd.read_csv(parsed.dataset)
+if parsed.train in ['occupation', 'skill', 'total']:
+    if parsed.train == 'occupation':
+        print("Preparing the OCCUPATION MODEL for the training")
+        if parsed.datasets_path is not None:
+            dataframe = pd.read_csv(os.path.join(parsed.datasets_path, 'occupation.csv'))
+        else:
+            dataframe = o_aggregated(db)
+        training_list = get_training_ids(db=db)
+        training_list = [str(i[0]) for i in training_list]
+        dataframe = dataset_generation.adding_columns(configuration['model']['occupation'], dataframe=dataframe, columns_name=training_list)
+        #dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
+        train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe, target_column_name=training_list)
+    elif parsed.train == 'skill':
+        print("Preparing the SKILL MODEL for the training")
+        if parsed.datasets_path is not None:
+            dataframe = pd.read_csv(os.path.join(parsed.datasets_path, 'skill.csv'))
+        else:
+            dataframe = s_aggregated(db)
+        training_list = get_training_ids(db=db)
+        training_list = [str(i[0]) for i in training_list]
+        dataframe = dataset_generation.adding_columns(configuration['model']['occupation'], dataframe=dataframe, columns_name=training_list)
+        #dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
+        train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe, target_column_name=training_list)
+    elif parsed.train == 'total':
+        print("Preparing the TOTAL MODEL for the training")
+        if parsed.datasets_path is not None:
+            dataframe = pd.read_csv(os.path.join(parsed.datasets_path, 'total.csv'))
+        else:
+            dataframe = t_aggregated(db)
+        training_list = get_training_ids(db=db)
+        training_list = [str(i[0]) for i in training_list]
+        dataframe = dataset_generation.total_adding_columns(dataframe=dataframe, target_column_name=configuration['model']['total']['target_column'], columns_name=training_list)
+        ttc(configuration['model']['total'], configuration['save_path'], data=dataframe, target_column_name=training_list)
+elif parsed.train not in ['occupation', 'skill', 'total'] and parsed.train is not None:
+    raise(NotImplementedError(f"The {parsed.train} is not recognized as authorized parameter"))
+if parsed.api:
+    if parsed.datasets_path is not None:
+        start_api(config=configuration, db_connector=db, dataframes_path=parsed.datasets_path)
     else:
-        dataframe = "dataset" #TODO get data from SQL
-    features = extract_features_from_text(ml_config, dataframe, ['occupation_preferred_label', 'occupation_description',
-                                                              'isco_preferred_label', 'isco_group_description',
-                                                              'occupation_skill_skill_type'], "english", True,
-                                          "hashing")
-
-
-    km = training_kmeans(ml_config, features)
-    save_model(ml_config, km)
+        start_api(config=configuration, db_connector=db)
