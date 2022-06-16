@@ -3,9 +3,9 @@ import pandas as pd
 
 def connect_to_database(host:str, username:str, password:str, database_name:str = None, port: int =3306) -> mysql_connector.CMySQLConnection:
     if database_name is None:
-        db = mysql_connector.connect(host=host, username=username, password=password, port=port)
+        db = mysql_connector.connect(host=host, username=username, password=password, port=port, buffered=True)
     else:
-        db = mysql_connector.connect(host=host, username=username, password=password, database=database_name, port=port)
+        db = mysql_connector.connect(host=host, username=username, password=password, database=database_name, port=port, buffered=True)
 
     return db
 
