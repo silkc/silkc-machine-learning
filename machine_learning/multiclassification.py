@@ -8,7 +8,6 @@ import pickle
 import time
 import os
 
-
 def train_classifier(model_config:dict, save_config:dict, data:pd.DataFrame, target_column_name:list):
     
     classifier = OneVsRestClassifier(DecisionTreeClassifier(min_samples_split=model_config['train']['min_samples_split'], random_state=model_config['train']['random_state']))
