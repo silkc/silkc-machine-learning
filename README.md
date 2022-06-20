@@ -36,12 +36,12 @@ Open `database.json` and configure a read access to the database used by the `si
 ### Training
 
 To run, position yourself in the base folder of the project and launch:
-`python3 main.py -dbc config/database.json -mlc config/ml_config.json --train`
+`python3 main.py  -mlc config/configuration.json --train total`
 
 This will query the database to aggregate the data, and write the trained model file in the folder defined in `ml_config.json`.
 It also provides you with feedback on several quality indicators for the algorithm as follows...
 ```
-$ python3 main.py -dbc config/database.json -mlc config/ml_config.json --train
+$ python3 main.py -mlc config/ml_config.json --train total
 Preparing model training...
 Extracting features...
 Training model...
@@ -75,7 +75,7 @@ To launch the training process as a REST API, use the `--api` argument.
 
 This should show feedback with connection details, like so:
 ```
-$ python3 main.py -dbc config/database.json -mlc config/ml_config.json --api
+$ python3 main.py -c config/configuration.json --api
  * Serving Flask app 'api.api' (lazy loading)
  * Environment: production
    WARNING: This is a development server. Do not use it in a production deployment.
@@ -91,7 +91,25 @@ Postman to trigger the model training through the database input.
 
 ### API/Inference
 
-To be documented...
+The output of the API contains the structure:
+
+```
+{
+  status: 200,
+  response: {
+    result: {dictionary with the training_id list},
+    message: "A message that inform about the result of the executed model",
+    score: inference_score,
+    inference_time: time_required_for_the_inference
+  }
+}
+```
+
+The status in the response can assume the values:
+* 200 : model executed corectly;
+* 406 : the input keys do not exist in the model configuration;
+* 406 : the model specified in the request does not exist;
+* 406 : the model is not specified in the body of the request;
 
 ## Notes
 
