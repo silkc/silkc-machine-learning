@@ -1,7 +1,6 @@
 import os
 import argparse
 
-from pyparsing import col
 from api.api import start_api
 import config.config_loading
 from data import sql_reader
@@ -9,6 +8,8 @@ from data.occupation.data_aggregator import get_aggregated_dataframe as o_aggreg
 from data.skill.data_aggregator import get_aggregated_dataframe as s_aggregated
 from data.preprocessing import encoding, dataset_generation
 from data.training_data_reader import get_training_ids
+from data.total.data_aggregator import get_aggregated_dataframe as t_aggregated
+from machine_learning.total_multiclassification import train_classifier as ttc
 from machine_learning.multiclassification import train_classifier
 import pandas as pd
 from data import sql_reader
@@ -26,7 +27,7 @@ configuration = config.config_loading.get_configuration(parsed.config)
 db = sql_reader.connect_to_database(configuration['database']['host'], configuration['database']['user'], configuration['database']['passwd'], configuration['database']['name'], configuration['database']['port'])
 
 #%% Create the base configuration
-if parsed.train in ['occupation', 'skill']:
+if parsed.train in ['occupation', 'skill', 'total']:
     if parsed.train == 'occupation':
         print("Preparing the OCCUPATION MODEL for the training")
         if parsed.datasets_path is not None:
@@ -49,7 +50,17 @@ if parsed.train in ['occupation', 'skill']:
         dataframe = dataset_generation.adding_columns(configuration['model']['occupation'], dataframe=dataframe, columns_name=training_list)
         #dataframe, relation = data_organization.encode_relation(configuration['save_path'], dataframe=dataframe)
         train_classifier(configuration['model']['occupation'], configuration['save_path'], data=dataframe, target_column_name=training_list)
-elif parsed.train not in ['occupation', 'skill'] and parsed.train is not None:
+    elif parsed.train == 'total':
+        print("Preparing the TOTAL MODEL for the training")
+        if parsed.datasets_path is not None:
+            dataframe = pd.read_csv(os.path.join(parsed.datasets_path, 'total.csv'))
+        else:
+            dataframe = t_aggregated(db)
+        training_list = get_training_ids(db=db)
+        training_list = [str(i[0]) for i in training_list]
+        dataframe = dataset_generation.total_adding_columns(dataframe=dataframe, target_column_name=configuration['model']['total']['target_column'], columns_name=training_list)
+        ttc(configuration['model']['total'], configuration['save_path'], data=dataframe, target_column_name=training_list)
+elif parsed.train not in ['occupation', 'skill', 'total'] and parsed.train is not None:
     raise(NotImplementedError(f"The {parsed.train} is not recognized as authorized parameter"))
 if parsed.api:
     if parsed.datasets_path is not None:
