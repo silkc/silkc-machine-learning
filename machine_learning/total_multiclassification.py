@@ -8,16 +8,25 @@ import pickle
 import time
 import os
 
+
 def train_classifier(model_config:dict, save_config:dict, data:pd.DataFrame, target_column_name:list):
     
     classifier = OneVsRestClassifier(DecisionTreeClassifier(min_samples_split=model_config['train']['min_samples_split'], random_state=model_config['train']['random_state']))
     
+    columns_list = data.columns.tolist()
+    with open('column_list.txt', 'w') as f:
+        for column in columns_list:
+            f.write(f'\"{column}\":0,'+'\n')
+    columns_list = list(set(columns_list) - set(target_column_name))
+    with open('column_list2.txt', 'w') as f:
+        for column in columns_list:
+            f.write(f'\"{column}\":0,'+'\n')
     train, test = train_test_split(data, test_size=model_config['train']['split_percentage'])
     
-    train_features = train[model_config['input_columns']]
+    train_features = train[columns_list]
     train_target = train[target_column_name]
     
-    test_features = test[model_config['input_columns']]
+    test_features = test[columns_list]
     test_target = test[target_column_name]
     
     classifier.fit(train_features, train_target)
