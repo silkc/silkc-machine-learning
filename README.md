@@ -19,7 +19,27 @@ on the Machine Learning algorithms behind the training recommendation.
 
 This project is meant to be run on a recent Linux distribution.
 
-Requirements:
+### Hardware requirements
+This is Machine Learning software, so running it for any kind of large 
+dataset will require considerable amounts of processing power. However,
+with the minimal data available for testing in the sister silkc-platform
+application, 1 vCPU should be enough. We measured that it takes about 20'
+on a modest 1vCPU VM to train the "total" model.
+We also measured that, under 1GB of RAM, issues can arise both in the
+model training process or in running a local database, if you decide to
+do it that way.
+
+So minimal hardware requirements can be defined as:
+* 1 vCPU
+* 1GB RAM
+
+If you are using this software on a stand-alone, remotely accessible machine,
+you will need to ensure that the API is accessible from the silkc-platform 
+machine, through port 5000.
+The API uses Flask from api/api.py. To run it on a different port, update the
+`app.run(debug=debug)` call at the end of api.py before you launch the API.
+
+### Software requirements
 * Python 3.9 or superior
 * pip 20 or superior
 * (optional) MariaDB server or MySQL to hold the local data source
