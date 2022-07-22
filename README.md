@@ -115,6 +115,15 @@ $ python3 main.py -c config/configuration.json --api
 You can then load `http://127.0.0.1:5000/training/database` in a browser or in 
 Postman to trigger the model training through the database input. 
 
+To run the API openly (on a network), you will have to update api/api.py (last line) to specify the `0.0.0.0` address:
+```python
+    app.run(debug=debug, host='0.0.0.0')
+```
+If you want to change the port to 80, you will to run the API as a privileged user to access port 80 (not recommended).
+```python
+    app.run(debug=debug, host='0.0.0.0', port=80)
+```
+
 ### API/Inference
 
 The output of the API contains the structure:
