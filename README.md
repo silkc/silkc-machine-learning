@@ -22,14 +22,20 @@ This project is meant to be run on a recent Linux distribution.
 Requirements:
 * Python 3.9 or superior
 * pip 20 or superior
+* (optional) MariaDB server or MySQL to hold the local data source
 
 To install the required Python modules, run `sh configure.sh`. 
 This will execute a `pip install` on the packages defined in `requirements.txt`.
 
 The Docker setup is experimental.
 
-Next, go to the `config/` directory and copy all `.json.dist` files to a local `.json` version of each file.
-Open `database.json` and configure a read access to the database used by the `silkc-platform` project.
+e.g. on Ubuntu 22.04 and up:
+```
+sudo apt install python3 pip mariadb-server mariadb-client
+sh configure.sh
+````
+
+Update the database section in config/configuration.json to match your database credentials.
 
 ## Run
 
